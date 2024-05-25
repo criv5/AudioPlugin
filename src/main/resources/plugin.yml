@@ -1,0 +1,7 @@
+main: me.criv.audio.Main
+name: AudioPlugin
+version: '1.0'
+description: A test plugin
+author: criv
+prefix: Testing
+depend: [WorldGuard]
