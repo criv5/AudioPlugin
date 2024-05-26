@@ -1,7 +1,7 @@
 main: me.criv.audio.Main
 name: AudioPlugin
 version: '1.0'
-description: A test plugin
+description: A regional audio plugin
 author: criv
-prefix: Testing
-depend: [WorldGuard]
+prefix: AudioPlugin
+depend: [WorldGuard, ProtocolLib]

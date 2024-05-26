@@ -2,26 +2,13 @@ package me.criv.audio;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import me.criv.audio.events.PlayerRegionEvent;
-import net.minecraft.core.Holder;
-import net.minecraft.network.protocol.game.PacketPlayOutEntitySound;
-import net.minecraft.resources.MinecraftKey;
-import net.minecraft.sounds.SoundEffect;
-import net.minecraft.sounds.SoundEffects;
-import net.minecraft.world.entity.Entity;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
-
 import java.util.Map;
-import java.util.Objects;
-
 import static me.criv.audio.Main.*;
 import static me.criv.audio.events.EventConstructor.lastRegion;
 
@@ -32,7 +19,7 @@ public class Events implements Listener {
         Player player = event.getPlayer();
         Location location = player.getLocation();
         ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(location));
-        player.sendMessage("armorstand should have summoned at u");
+        lastRegion.put(player.getUniqueId(), getRegion(player));
     }
 
     @EventHandler
@@ -60,6 +47,7 @@ public class Events implements Listener {
     public void onRegionChange(PlayerRegionEvent event) {
         Player player = event.getPlayer();
         String newRegion = event.getNewRegion();
+        String oldRegion = event.getOldRegion();
         player.sendMessage("now entering " + newRegion + " land");
         BukkitRunnable runnable = new BukkitRunnable() {
             final int oldTime = currentTrack;
@@ -69,6 +57,7 @@ public class Events implements Listener {
             public void run() {
                 Packets.transitionHeight = height;
                 Packets.transitioning = true;
+                Packets.ascending = true;
                 if(time < (Packets.transitionTime/2)) {
                     height = time;
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
@@ -76,7 +65,8 @@ public class Events implements Listener {
                     time++;
                 }
                 if(time == (Packets.transitionTime/2)) {
-                    player.stopSound(lastRegion.get(player.getUniqueId())+currentTrack);
+                    Packets.ascending = false;
+                    player.stopSound(regionSoundMap.get(oldRegion)+currentTrack);
                     if(oldTime != currentTrack) {
                         time++;
                     }
@@ -84,6 +74,7 @@ public class Events implements Listener {
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
                 }
                 if(time > (Packets.transitionTime/2) && time <= (Packets.transitionTime)) {
+                    Packets.ascending = false;
                     height = (Packets.transitionTime) - time;
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
@@ -94,6 +85,7 @@ public class Events implements Listener {
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
                     Packets.transitioning = false;
+                    Packets.ascending = false;
                     cancel();
                 }
             }
@@ -111,15 +103,15 @@ public class Events implements Listener {
         }
         if(message.contains("newmap")) {
             String[] spliced = message.split(" ");
-            regionsounds.put(spliced[1], spliced[2]);
-            for(Map.Entry<String, String> entry : regionsounds.entrySet()) {
+            regionSoundMap.put(spliced[1], spliced[2]);
+            for(Map.Entry<String, String> entry : regionSoundMap.entrySet()) {
                 instance.getConfig().getConfigurationSection("region-sound-mappings").set(entry.getKey(), entry.getValue());
                 instance.saveConfig();
             }
             player.sendMessage("added");
         }
         if(message.contains("seemap")) {
-            player.sendMessage(regionsounds.toString());
+            player.sendMessage(regionSoundMap.toString());
         }
     }
 }

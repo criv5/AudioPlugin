@@ -9,8 +9,6 @@ import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.criv.audio.events.EventConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Sound;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -18,16 +16,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.UUID;
 
 import static me.criv.audio.events.EventConstructor.lastRegion;
 
 public class Main extends JavaPlugin implements Listener {
-    EventConstructor eventConstructor = new EventConstructor();
     static int currentTrack = 0;
-    static HashMap<String, String> regionsounds = new HashMap<>();
-    Events events = new Events();
+    static HashMap<String, String> regionSoundMap = new HashMap<>();
     static Main instance;
+    EventConstructor eventConstructor = new EventConstructor();
+    Events events = new Events();
     FileConfiguration config = getConfig();
 
     public static Main getInstance() {
@@ -69,8 +69,9 @@ public class Main extends JavaPlugin implements Listener {
                 }
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendMessage("we just changed tracks " + currentTrack);
-                    if(regionsounds.containsKey(getRegion(player))) {
-                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(regionsounds.get(getRegion(player))));
+                    if(regionSoundMap.containsKey(getRegion(player))) {
+                        if(Packets.ascending) return;
+                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(regionSoundMap.get(getRegion(player))));
                     }
                 }
             }
@@ -82,11 +83,11 @@ public class Main extends JavaPlugin implements Listener {
         Set<String> keys = section.getKeys(false);
         for(String key : keys) {
             String value = section.getString(key);
-            regionsounds.put(key,value);
+            regionSoundMap.put(key,value);
         }
     }
 
-    public String getRegion(Player player) {
+    public static String getRegion(Player player) {
         Location location = player.getLocation();
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionQuery query = container.createQuery();

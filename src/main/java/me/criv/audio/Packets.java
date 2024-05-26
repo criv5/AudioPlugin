@@ -5,20 +5,17 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.EquivalentConverter;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import net.minecraft.core.Holder;
-
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.sounds.SoundEffect;
-import net.minecraft.util.ResourceLocationPattern;
 import org.bukkit.Location;
-import org.bukkit.Sound;
 import org.bukkit.entity.EntityType;
-
-import java.util.Optional;
 import java.util.UUID;
 public class Packets {
     public static final int transitionTime = 40;
     public static final int staticEntityID = -2147483648;
+    public static boolean ascending = false;
     public static boolean transitioning = false;
     public static int transitionHeight = 0;
     public static PacketContainer spawnEntityPacket(Location location) {
