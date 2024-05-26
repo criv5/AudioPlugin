@@ -8,6 +8,7 @@ import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.criv.audio.events.EventConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,6 +33,7 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(eventConstructor, this);
         getServer().getPluginManager().registerEvents(events, this);
+
         Bukkit.getConsoleSender().sendMessage("§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED");
         new BukkitRunnable() {
             @Override

@@ -2,13 +2,24 @@ package me.criv.audio;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import me.criv.audio.events.PlayerRegionEvent;
+import net.minecraft.core.Holder;
+import net.minecraft.network.protocol.game.PacketPlayOutEntitySound;
+import net.minecraft.resources.MinecraftKey;
+import net.minecraft.sounds.SoundEffect;
+import net.minecraft.sounds.SoundEffects;
+import net.minecraft.world.entity.Entity;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Objects;
 
 import static me.criv.audio.Main.*;
 import static me.criv.audio.events.EventConstructor.lastRegion;
@@ -71,7 +82,11 @@ public class Events implements Listener {
                 }
                 if(time == (Packets.transitionTime/2)) {
                     player.stopAllSounds();
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(finalSound));
+                    if(newRegion.equals("poop10")) {
+                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(finalSound, true));
+                    } else {
+                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(finalSound, false));
+                    }
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
                 }
