@@ -1,5 +1,6 @@
 package me.criv.audio;
 
+import com.comphenix.protocol.ProtocolLibrary;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
@@ -9,6 +10,9 @@ import me.criv.audio.events.EventConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,8 +24,11 @@ import static me.criv.audio.events.EventConstructor.lastRegion;
 
 public class Main extends JavaPlugin implements Listener {
     EventConstructor eventConstructor = new EventConstructor();
+    static int currentTrack = 0;
+    static HashMap<String, String> regionsounds = new HashMap<>();
     Events events = new Events();
     static Main instance;
+    FileConfiguration config = getConfig();
 
     public static Main getInstance() {
         return instance;
@@ -33,7 +40,12 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(eventConstructor, this);
         getServer().getPluginManager().registerEvents(events, this);
-
+        if(!config.isConfigurationSection("region-sound-mappings")) {
+            config.createSection("region-sound-mappings");
+            saveConfig();
+        }
+        getSoundMappings();
+        saveConfig();
         Bukkit.getConsoleSender().sendMessage("§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED");
         new BukkitRunnable() {
             @Override
@@ -48,15 +60,30 @@ public class Main extends JavaPlugin implements Listener {
             }
         }.runTaskTimer(this, 0, 0);
 
-        //runs every 15 seconds
         new BukkitRunnable() {
             @Override
             public void run() {
+                currentTrack++;
+                if(currentTrack > 24) {
+                    currentTrack = 0;
+                }
                 for(Player player : Bukkit.getOnlinePlayers()) {
-                    if(getRegion(player).equals("none")) return;
+                    player.sendMessage("we just changed tracks " + currentTrack);
+                    if(regionsounds.containsKey(getRegion(player))) {
+                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(regionsounds.get(getRegion(player))));
+                    }
                 }
             }
-        }.runTaskTimer(this, 300, 0);
+        }.runTaskTimer(this, 0, 100);
+    }
+
+    public void getSoundMappings() {
+        ConfigurationSection section = getConfig().getConfigurationSection("region-sound-mappings");
+        Set<String> keys = section.getKeys(false);
+        for(String key : keys) {
+            String value = section.getString(key);
+            regionsounds.put(key,value);
+        }
     }
 
     public String getRegion(Player player) {

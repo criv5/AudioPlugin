@@ -17,7 +17,7 @@ import org.bukkit.entity.EntityType;
 import java.util.Optional;
 import java.util.UUID;
 public class Packets {
-    public static final int transitionTime = 50;
+    public static final int transitionTime = 40;
     public static final int staticEntityID = -2147483648;
     public static boolean transitioning = false;
     public static int transitionHeight = 0;
@@ -51,8 +51,8 @@ public class Packets {
         return entityTeleport;
     }
 
-    public static PacketContainer playEntitySoundPacket(Sound sound, boolean stupid) {
-        SoundEffect effect2 = SoundEffect.a(new MinecraftKey("minecraft", "piano"));
+    public static PacketContainer playEntitySoundPacket(String sound) {
+        SoundEffect effect2 = SoundEffect.a(new MinecraftKey("minecraft", sound + Main.currentTrack));
         Holder<SoundEffect> effectHolder = Holder.a(effect2);
 
         PacketContainer attachedSound = new PacketContainer(PacketType.Play.Server.ENTITY_SOUND);
@@ -65,25 +65,20 @@ public class Packets {
                 .write(1, 1F);
         attachedSound.getLongs()
                 .write(0,0L);
-        if(stupid) {
-            attachedSound.getHolders(MinecraftReflection.getSoundEffectClass(), new EquivalentConverter<Holder<SoundEffect>>() {
-                @Override
-                public Object getGeneric(Holder<SoundEffect> soundEffectHolder) {
-                    return effect2;
-                }
-                @Override
-                public Holder<SoundEffect> getSpecific(Object o) {
-                    return null;
-                }
-                @Override
-                public Class<Holder<SoundEffect>> getSpecificType() {
-                    return null;
-                }
-            }).write(0, effectHolder);
-        } else {
-            attachedSound.getSoundEffects()
-                    .write(0, sound);
-        }
+        attachedSound.getHolders(MinecraftReflection.getSoundEffectClass(), new EquivalentConverter<Holder<SoundEffect>>() {
+            @Override
+            public Object getGeneric(Holder<SoundEffect> soundEffectHolder) {
+                return effect2;
+            }
+            @Override
+            public Holder<SoundEffect> getSpecific(Object o) {
+                return null;
+            }
+            @Override
+            public Class<Holder<SoundEffect>> getSpecificType() {
+                return null;
+            }
+        }).write(0, effectHolder);
         return attachedSound;
     }
 }

@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static me.criv.audio.Main.*;
@@ -60,15 +61,8 @@ public class Events implements Listener {
         Player player = event.getPlayer();
         String newRegion = event.getNewRegion();
         player.sendMessage("now entering " + newRegion + " land");
-        Sound sound = Sound.MUSIC_DISC_RELIC; //relic i think
-        if(newRegion.equals("none"))
-            sound = Sound.MUSIC_DISC_CHIRP; //chirp
-        if(newRegion.equals("fart"))
-            sound = Sound.MUSIC_DISC_STAL; //stal
-        if(newRegion.equals("poop10"))
-            sound = Sound.MUSIC_DISC_CAT;
-        Sound finalSound = sound;
         BukkitRunnable runnable = new BukkitRunnable() {
+            final int oldTime = currentTrack;
             int time = 0;
             int height = 0;
             @Override
@@ -79,13 +73,12 @@ public class Events implements Listener {
                     height = time;
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
+                    time++;
                 }
                 if(time == (Packets.transitionTime/2)) {
-                    player.stopAllSounds();
-                    if(newRegion.equals("poop10")) {
-                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(finalSound, true));
-                    } else {
-                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(finalSound, false));
+                    player.stopSound(lastRegion.get(player.getUniqueId())+currentTrack);
+                    if(oldTime != currentTrack) {
+                        time++;
                     }
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
@@ -94,6 +87,7 @@ public class Events implements Listener {
                     height = (Packets.transitionTime) - time;
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
                     player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
+                    time++;
                 }
                 if(time > (Packets.transitionTime)) {
                     height = 0;
@@ -102,7 +96,6 @@ public class Events implements Listener {
                     Packets.transitioning = false;
                     cancel();
                 }
-                time++;
             }
         };
              runnable.runTaskTimer(getInstance(), 0, 1);
@@ -115,6 +108,18 @@ public class Events implements Listener {
         if(message.equals("test")) {
             player.sendMessage("yep");
             player.sendMessage(lastRegion.toString());
+        }
+        if(message.contains("newmap")) {
+            String[] spliced = message.split(" ");
+            regionsounds.put(spliced[1], spliced[2]);
+            for(Map.Entry<String, String> entry : regionsounds.entrySet()) {
+                instance.getConfig().getConfigurationSection("region-sound-mappings").set(entry.getKey(), entry.getValue());
+                instance.saveConfig();
+            }
+            player.sendMessage("added");
+        }
+        if(message.contains("seemap")) {
+            player.sendMessage(regionsounds.toString());
         }
     }
 }
