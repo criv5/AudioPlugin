@@ -23,6 +23,7 @@ import java.util.UUID;
 import static me.criv.audio.events.EventConstructor.lastRegion;
 
 public class Main extends JavaPlugin implements Listener {
+    static HashMap<UUID, Data> playerData = new HashMap<>();
     static int currentTrack = 0;
     static HashMap<String, String> regionSoundMap = new HashMap<>();
     static Main instance;
@@ -47,6 +48,9 @@ public class Main extends JavaPlugin implements Listener {
         getSoundMappings();
         saveConfig();
         Bukkit.getConsoleSender().sendMessage("§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED");
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(player.getLocation()));
+        }
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -97,5 +101,8 @@ public class Main extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        for(Player player : Bukkit.getOnlinePlayers()) {
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
+        }
     }
 }

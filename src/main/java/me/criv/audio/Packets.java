@@ -78,4 +78,13 @@ public class Packets {
         }).write(0, effectHolder);
         return attachedSound;
     }
+
+    public static PacketContainer destroyEntityPacket() {
+        PacketContainer destroyEntity = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
+        destroyEntity.getIntegers()
+                .write(0,1);
+        destroyEntity.getIntegerArrays()
+                .write(0, new int[]{staticEntityID});
+        return destroyEntity;
+    }
 }

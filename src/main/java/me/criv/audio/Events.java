@@ -50,42 +50,44 @@ public class Events implements Listener {
         String oldRegion = event.getOldRegion();
         player.sendMessage("now entering " + newRegion + " land");
         BukkitRunnable runnable = new BukkitRunnable() {
+            Packets packet = new Packets();
             final int oldTime = currentTrack;
             int time = 0;
             int height = 0;
+            double increment = 0.5;
             @Override
             public void run() {
-                Packets.transitionHeight = height;
-                Packets.transitioning = true;
-                Packets.ascending = true;
-                if(time < (Packets.transitionTime/2)) {
+                packet.transitionHeight = height;
+                packet.transitioning = true;
+                packet.ascending = true;
+                if(time < (packet.transitionTime/2)) {
                     height = time;
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
-                    player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet.teleportEntityPacket(player.getLocation()));
+                    //player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
                     time++;
                 }
-                if(time == (Packets.transitionTime/2)) {
-                    Packets.ascending = false;
+                if(time == (packet.transitionTime/2)) {
+                    packet.ascending = false;
                     player.stopSound(regionSoundMap.get(oldRegion)+currentTrack);
                     if(oldTime != currentTrack) {
                         time++;
                     }
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
-                    player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet.teleportEntityPacket(player.getLocation()));
+                    //player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
                 }
-                if(time > (Packets.transitionTime/2) && time <= (Packets.transitionTime)) {
-                    Packets.ascending = false;
+                if(time > (packet.transitionTime/2) && time <= (packet.transitionTime)) {
+                    packet.ascending = false;
                     height = (Packets.transitionTime) - time;
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
-                    player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet.teleportEntityPacket(player.getLocation()));
+                    //player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
                     time++;
                 }
-                if(time > (Packets.transitionTime)) {
+                if(time > (packet.transitionTime)) {
                     height = 0;
-                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player.getLocation()));
-                    player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
-                    Packets.transitioning = false;
-                    Packets.ascending = false;
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet.teleportEntityPacket(player.getLocation()));
+                    //player.sendMessage("transitioning bool = " + Packets.transitioning + " and time is " + time + " and distance should be " + Packets.transitionHeight);
+                    packet.transitioning = false;
+                    packet.ascending = false;
                     cancel();
                 }
             }
