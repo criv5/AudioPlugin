@@ -5,19 +5,17 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.EquivalentConverter;
 import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.sounds.SoundEffect;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+
+import java.util.Collections;
 import java.util.UUID;
 public class Packets {
-    public static final int transitionTime = 40;
     public static final int staticEntityID = -2147483648;
-    public static boolean ascending = false;
-    public static boolean transitioning = false;
-    public static int transitionHeight = 0;
     public static PacketContainer spawnEntityPacket(Location location) {
         PacketContainer soundEntity = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
         soundEntity.getIntegers()
@@ -33,14 +31,15 @@ public class Packets {
                 .write(0,EntityType.ARMOR_STAND);
         return soundEntity;
             }
-    public static PacketContainer teleportEntityPacket(Location location) {
+    public static PacketContainer teleportEntityPacket(Player player, Location location) {
+        double transitionHeight = Data.getPlayerData(player.getUniqueId()).getHeight();
         PacketContainer entityTeleport = new PacketContainer(PacketType.Play.Server.ENTITY_TELEPORT);
         entityTeleport.getIntegers()
                 .write(0, staticEntityID);
         entityTeleport.getDoubles()
                 .write(0, location.getX())
                 .write(2, location.getZ());
-        if(!transitioning) {
+        if(!Data.getPlayerData(player.getUniqueId()).getTransitioning()) {
             entityTeleport.getDoubles().write(1, location.getY());
         } else {
             entityTeleport.getDoubles().write(1, location.getY() + transitionHeight);
@@ -48,8 +47,8 @@ public class Packets {
         return entityTeleport;
     }
 
-    public static PacketContainer playEntitySoundPacket(String sound) {
-        SoundEffect effect2 = SoundEffect.a(new MinecraftKey("minecraft", sound + Main.currentTrack));
+    public static PacketContainer playEntitySoundPacket(String sound, int number) {
+        SoundEffect effect2 = SoundEffect.a(new MinecraftKey("minecraft", sound + number));
         Holder<SoundEffect> effectHolder = Holder.a(effect2);
 
         PacketContainer attachedSound = new PacketContainer(PacketType.Play.Server.ENTITY_SOUND);
@@ -81,10 +80,8 @@ public class Packets {
 
     public static PacketContainer destroyEntityPacket() {
         PacketContainer destroyEntity = new PacketContainer(PacketType.Play.Server.ENTITY_DESTROY);
-        destroyEntity.getIntegers()
-                .write(0,1);
-        destroyEntity.getIntegerArrays()
-                .write(0, new int[]{staticEntityID});
+        destroyEntity.getIntLists()
+                .write(0, Collections.singletonList(staticEntityID));
         return destroyEntity;
     }
 }

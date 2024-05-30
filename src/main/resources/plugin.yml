@@ -5,3 +5,8 @@ description: A regional audio plugin
 author: criv
 prefix: AudioPlugin
 depend: [WorldGuard, ProtocolLib]
+commands:
+  regionsound:
+    description: Region sound commands
+    usage: /regionsound command
+    aliases: [rsm, rs]
