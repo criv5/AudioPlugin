@@ -2,27 +2,45 @@ package me.criv.audio;
 
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 public class Data {
+    static HashMap<UUID, Data> playerData = new HashMap<>();
+
     private Player player;
     private boolean transitioning;
-    private double transheight;
+    private double height;
+    private State state;
 
+    enum State {
+        INACTIVE,
+        ASCENDING,
+        SWITCH,
+        DESCENDING
+    }
     public Data(Player player) {
         this.player = player;
         this.transitioning = false;
-        this.transheight = 0;
+        this.height = 0;
+        this.state = State.INACTIVE;
+        playerData.put(player.getUniqueId(), this);
     }
 
     public Player getPlayer() {
         return player;
     }
 
-    public boolean isTransitioning() {
+    public boolean getTransitioning() {
         return transitioning;
     }
 
-    public double getTransheight() {
-        return transheight;
+    public State getState() {
+        return state;
+    }
+
+    public double getHeight() {
+        return height;
     }
 
     public void setPlayer(Player player) {
@@ -33,8 +51,16 @@ public class Data {
         this.transitioning = transitioning;
     }
 
-    public void setTransheight(double transheight) {
-        this.transheight = transheight;
+    public void setHeight(double transheight) {
+        this.height = transheight;
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public static Data getPlayerData(UUID uuid) {
+        return playerData.get(uuid);
     }
 
     //IF PACKET OUT OF RENDER DISTANCE, KILL AND RESPAWN OR TELEPORT MAYBE CONSIDER MAKING A PASSENGER MIGHT WORK

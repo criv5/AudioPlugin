@@ -9,8 +9,6 @@ import com.sk89q.worldguard.protection.regions.RegionQuery;
 import me.criv.audio.events.EventConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -20,16 +18,15 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.UUID;
 
+import static me.criv.audio.Data.State.*;
+import static me.criv.audio.Data.playerData;
 import static me.criv.audio.events.EventConstructor.lastRegion;
 
 public class Main extends JavaPlugin implements Listener {
-    static HashMap<UUID, Data> playerData = new HashMap<>();
-    static int currentTrack = 0;
-    static HashMap<String, String> regionSoundMap = new HashMap<>();
+    static int trackIncrement = 0;
     static Main instance;
     EventConstructor eventConstructor = new EventConstructor();
     Events events = new Events();
-    FileConfiguration config = getConfig();
 
     public static Main getInstance() {
         return instance;
@@ -38,17 +35,17 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
+        getCommand("regionsound").setExecutor(events);
+        getCommand("rs").setExecutor(events);
+        getCommand("rsm").setExecutor(events);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(eventConstructor, this);
         getServer().getPluginManager().registerEvents(events, this);
-        if(!config.isConfigurationSection("region-sound-mappings")) {
-            config.createSection("region-sound-mappings");
-            saveConfig();
-        }
-        getSoundMappings();
+        Config.createDefaults();
         saveConfig();
-        Bukkit.getConsoleSender().sendMessage("§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED \n§a AUDIOPLUGIN ENABLED");
+        Bukkit.getConsoleSender().sendMessage("§a AUDIOPLUGIN ENABLED");
         for(Player player : Bukkit.getOnlinePlayers()) {
+            //ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(player.getLocation()));
         }
         new BukkitRunnable() {
@@ -59,6 +56,7 @@ public class Main extends JavaPlugin implements Listener {
                     Player player = Bukkit.getPlayer(uuid);
                     if (player == null) {
                         lastRegion.remove(uuid);
+                        playerData.remove(uuid);
                     }
                 }
             }
@@ -67,28 +65,20 @@ public class Main extends JavaPlugin implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                currentTrack++;
-                if(currentTrack > 24) {
-                    currentTrack = 0;
-                }
+                trackIncrement++;
                 for(Player player : Bukkit.getOnlinePlayers()) {
-                    player.sendMessage("we just changed tracks " + currentTrack);
-                    if(regionSoundMap.containsKey(getRegion(player))) {
-                        if(Packets.ascending) return;
-                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(regionSoundMap.get(getRegion(player))));
+                    player.sendMessage("we just changed tracks " + trackIncrement);
+                    if (getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(getRegion(player)) && Data.getPlayerData(player.getUniqueId()).getState() != ASCENDING) {
+                        int max = Config.getMax(getRegion(player));
+                        if(max == 0) max = 1;
+                        int divider = (trackIncrement/max);
+                        int currentTrack = trackIncrement-(divider*max);
+                        player.sendMessage("sound: " +Config.getSound(getRegion(player)) + " and max is " + Config.getMax(getRegion(player)) + " and current track number should be " + currentTrack);
+                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(Config.getSound(getRegion(player)), currentTrack));
                     }
                 }
             }
-        }.runTaskTimer(this, 0, 100);
-    }
-
-    public void getSoundMappings() {
-        ConfigurationSection section = getConfig().getConfigurationSection("region-sound-mappings");
-        Set<String> keys = section.getKeys(false);
-        for(String key : keys) {
-            String value = section.getString(key);
-            regionSoundMap.put(key,value);
-        }
+        }.runTaskTimer(this, 0, Config.getSyncInterval()*20L);
     }
 
     public static String getRegion(Player player) {
@@ -102,7 +92,7 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         for(Player player : Bukkit.getOnlinePlayers()) {
-                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
+            ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
         }
     }
 }
