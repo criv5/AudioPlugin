@@ -58,23 +58,25 @@ public class Events implements Listener, CommandExecutor {
         Data.getPlayerData(player.getUniqueId()).setTransitioning(true);
         BukkitRunnable runnable = new BukkitRunnable() {
             final int lastIncrement = trackIncrement;
+            final double fadeTime = Config.getFadeTime();
+            final double fadeHeight = Config.getFadeHeight();
             int time = 0;
             double height = 0;
             @Override
             public void run() {
-                if(time > Config.getFadeTime()) {
+                if(time > fadeTime*2) {
                     //Data.getPlayerData(player.getUniqueId()).setHeight(0);
                     Data.getPlayerData(player.getUniqueId()).setState(INACTIVE);
                     Data.getPlayerData(player.getUniqueId()).setTransitioning(false);
                     cancel();
                 }
-                if(time < Config.getFadeTime()/2) {
-                    Data.getPlayerData(player.getUniqueId()).setState(ASCENDING);
-                    height = height+Config.getFadeHeight()/(Config.getFadeTime()/2);
+                if(time < fadeTime) {
+                    Data.getPlayerData(player.getUniqueId()).setState(FADEOUT);
+                    height = height+Config.getFadeHeight()/(fadeTime/2);
                     Data.getPlayerData(player.getUniqueId()).setHeight(height);
                     time++;
                 }
-                if(time == Config.getFadeTime()/2) {
+                if(time == fadeTime) {
                     Data.getPlayerData(player.getUniqueId()).setState(SWITCH);
                     if(trackIncrement != lastIncrement) {
                         int lastIncrement = trackIncrement-1;
@@ -87,9 +89,9 @@ public class Events implements Listener, CommandExecutor {
                         time++;
                     }
                 }
-                if(time > Config.getFadeTime()/2) {
-                    Data.getPlayerData(player.getUniqueId()).setState(DESCENDING);
-                    height = height-Config.getFadeHeight()/(Config.getFadeTime()/2);
+                if(time > fadeTime) {
+                    Data.getPlayerData(player.getUniqueId()).setState(FADEIN);
+                    height = height-Config.getFadeHeight()/(fadeTime/2);
                     Data.getPlayerData(player.getUniqueId()).setHeight(height);
                     time++;
                 }
