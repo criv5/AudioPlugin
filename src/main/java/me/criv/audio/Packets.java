@@ -32,7 +32,7 @@ public class Packets {
         return soundEntity;
             }
     public static PacketContainer teleportEntityPacket(Player player, Location location) {
-        double transitionHeight = Data.getPlayerData(player.getUniqueId()).getHeight();
+        double fadeHeight = Data.getPlayerData(player.getUniqueId()).getHeight();
         PacketContainer entityTeleport = new PacketContainer(PacketType.Play.Server.ENTITY_TELEPORT);
         entityTeleport.getIntegers()
                 .write(0, staticEntityID);
@@ -42,7 +42,7 @@ public class Packets {
         if(!Data.getPlayerData(player.getUniqueId()).getTransitioning()) {
             entityTeleport.getDoubles().write(1, location.getY());
         } else {
-            entityTeleport.getDoubles().write(1, location.getY() + transitionHeight);
+            entityTeleport.getDoubles().write(1, location.getY() + fadeHeight);
         }
         return entityTeleport;
     }
