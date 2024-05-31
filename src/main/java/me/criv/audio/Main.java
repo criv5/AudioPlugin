@@ -68,11 +68,11 @@ public class Main extends JavaPlugin implements Listener {
                 trackIncrement++;
                 for(Player player : Bukkit.getOnlinePlayers()) {
                     player.sendMessage("we just changed tracks " + trackIncrement);
-                    if (getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(getRegion(player)) && Data.getPlayerData(player.getUniqueId()).getState() != ASCENDING) {
+                    if (getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(getRegion(player)) && Data.getPlayerData(player).getState() != FADEOUT) {
                         int max = Config.getMax(getRegion(player));
                         if(max == 0) max = 1;
                         int divider = (trackIncrement/max);
-                        int currentTrack = trackIncrement-(divider*max);
+                        int currentTrack = (trackIncrement-(divider*max))+1;
                         player.sendMessage("sound: " +Config.getSound(getRegion(player)) + " and max is " + Config.getMax(getRegion(player)) + " and current track number should be " + currentTrack);
                         ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(Config.getSound(getRegion(player)), currentTrack));
                     }

@@ -28,11 +28,11 @@ public class Config {
         if(config.get("sync-interval-seconds") == null) {
             config.set("sync-interval-seconds", 5);
         }
-        if(config.get("transition-time-seconds") == null) {
-            config.set("transition-time-seconds", 4);
+        if(config.get("fade-time-seconds") == null) {
+            config.set("fade-time-seconds", 1);
         }
-        if(config.get("transition-maximum-height-blocks") == null) {
-            config.set("transition-maximum-height-blocks", 32);
+        if(config.get("fade-height-blocks") == null) {
+            config.set("fade-height-blocks", 32);
         }
         instance.saveConfig();
     }
@@ -52,25 +52,25 @@ public class Config {
     public static String getSound(String region) {
         return config.getString("region-sound-mappings." + region +".sound");
     }
-    public static double getTransitionTime() {
-        return config.getDouble("transition-time-seconds")*20;
+    public static double getFadeTime() {
+        return config.getDouble("fade-time-seconds")*20;
     }
     public static int getSyncInterval() {
         return config.getInt("sync-interval-seconds");
     }
-    public static double getTransitionHeight() {
-        return config.getDouble("transition-maximum-height-blocks");
+    public static double getFadeHeight() {
+        return config.getDouble("fade-height-blocks");
     }
-    public static void setTransitionTime(int seconds) {
-        config.set("transition-time-seconds", seconds);
+    public static void setFadeTime(int seconds) {
+        config.set("fade-time-seconds", seconds);
         instance.saveConfig();
     }
     public static void setSyncInterval(int seconds) {
         config.set("sync-interval-seconds", seconds);
         instance.saveConfig();
     }
-    public static void setTransitionHeight(double blocks) {
-        config.set("transition-maximum-height-blocks", blocks);
+    public static void setFadeHeight(double blocks) {
+        config.set("fade-height-blocks", blocks);
         instance.saveConfig();
     }
 }
