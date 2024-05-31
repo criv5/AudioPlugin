@@ -51,16 +51,16 @@ public class Data {
         this.transitioning = transitioning;
     }
 
-    public void setHeight(double transheight) {
-        this.height = transheight;
+    public void setHeight(double height) {
+        this.height = height;
     }
 
     public void setState(State state) {
         this.state = state;
     }
 
-    public static Data getPlayerData(UUID uuid) {
-        return playerData.get(uuid);
+    public static Data getPlayerData(Player player) {
+        return playerData.get(player.getUniqueId());
     }
 
     //IF PACKET OUT OF RENDER DISTANCE, KILL AND RESPAWN OR TELEPORT MAYBE CONSIDER MAKING A PASSENGER MIGHT WORK
