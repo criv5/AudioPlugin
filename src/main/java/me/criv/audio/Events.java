@@ -62,19 +62,19 @@ public class Events implements Listener, CommandExecutor {
             double height = 0;
             @Override
             public void run() {
-                if(time > Config.getTransitionTime()) {
+                if(time > Config.getFadeTime()) {
                     //Data.getPlayerData(player.getUniqueId()).setHeight(0);
                     Data.getPlayerData(player.getUniqueId()).setState(INACTIVE);
                     Data.getPlayerData(player.getUniqueId()).setTransitioning(false);
                     cancel();
                 }
-                if(time < Config.getTransitionTime()/2) {
+                if(time < Config.getFadeTime()/2) {
                     Data.getPlayerData(player.getUniqueId()).setState(ASCENDING);
-                    height = height+Config.getTransitionHeight()/(Config.getTransitionTime()/2);
+                    height = height+Config.getFadeHeight()/(Config.getFadeTime()/2);
                     Data.getPlayerData(player.getUniqueId()).setHeight(height);
                     time++;
                 }
-                if(time == Config.getTransitionTime()/2) {
+                if(time == Config.getFadeTime()/2) {
                     Data.getPlayerData(player.getUniqueId()).setState(SWITCH);
                     if(trackIncrement != lastIncrement) {
                         int lastIncrement = trackIncrement-1;
@@ -82,14 +82,14 @@ public class Events implements Listener, CommandExecutor {
                         if(max == 0) max = 1;
                         int divider = (lastIncrement/max);
                         int lastTrack = lastIncrement-(divider*max);
-                        Data.getPlayerData(player.getUniqueId()).setHeight(Config.getTransitionHeight());
+                        Data.getPlayerData(player.getUniqueId()).setHeight(Config.getFadeHeight());
                         player.stopSound(Config.getSound(lastRegion.get(player.getUniqueId()))+lastTrack);
                         time++;
                     }
                 }
-                if(time > Config.getTransitionTime()/2) {
+                if(time > Config.getFadeTime()/2) {
                     Data.getPlayerData(player.getUniqueId()).setState(DESCENDING);
-                    height = height-Config.getTransitionHeight()/(Config.getTransitionTime()/2);
+                    height = height-Config.getFadeHeight()/(Config.getFadeTime()/2);
                     Data.getPlayerData(player.getUniqueId()).setHeight(height);
                     time++;
                 }
@@ -138,8 +138,8 @@ public class Events implements Listener, CommandExecutor {
                     player.sendMessage("height must be an integer");
                     return false;
                 }
-                Config.setTransitionHeight(height);
-                player.sendMessage("§3Set maximum transition height to §c" + Config.getTransitionHeight());
+                Config.setFadeHeight(height);
+                player.sendMessage("§3Set maximum fade height to §c" + Config.getFadeHeight());
                 return true;
             }
             if(args.length == 2 && args[0].equalsIgnoreCase("time")) {
@@ -151,8 +151,8 @@ public class Events implements Listener, CommandExecutor {
                     player.sendMessage("time must be an integer");
                     return false;
                 }
-                Config.setTransitionTime(time);
-                player.sendMessage("§3Set transition time to §c" + Config.getTransitionTime());
+                Config.setFadeTime(time);
+                player.sendMessage("§3Set fade time to §c" + Config.getFadeTime());
                 return true;
             }
         }
