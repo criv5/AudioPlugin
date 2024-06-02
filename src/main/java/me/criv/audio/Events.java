@@ -74,17 +74,17 @@ public class Events implements Listener, CommandExecutor {
 
                 if (time > fadeTime * 2 && playerData.getState() == FADEIN) {
                     playerData.setState(INACTIVE);
-                    if(Data.getPlayerData(player).getDebug())player.sendMessage("§a" + playerData.getState());
+                    if(playerData.getDebug()) player.sendMessage("§a" + playerData.getState());
                 } else if (time > fadeTime && playerData.getState() == SWITCH) {
                     playerData.setState(FADEIN);
-                    if(Data.getPlayerData(player).getDebug())player.sendMessage("§a" + playerData.getState());
+                    if(playerData.getDebug()) player.sendMessage("§a" + playerData.getState());
                 } else if (time == fadeTime && playerData.getState() == FADEOUT) {
                     playerData.setState(SWITCH);
-                    if(Data.getPlayerData(player).getDebug())player.sendMessage("§a" + playerData.getState());
+                    if(playerData.getDebug()) player.sendMessage("§a" + playerData.getState());
                     lastIncrement = trackIncrement;
                 } else if (time < 1 && playerData.getState() != SWITCH) {
                     playerData.setState(FADEOUT);
-                    if(Data.getPlayerData(player).getDebug())player.sendMessage("§a" + playerData.getState());
+                    if(playerData.getDebug()) player.sendMessage("§a" + playerData.getState());
                 }
 
                 if(time > fadeTime && playerData.getState() == FADEOUT) cancel();
@@ -143,29 +143,29 @@ public class Events implements Listener, CommandExecutor {
                     return false;
                 }
                 Config.addRegionObject(region, sound, max);
-                player.sendMessage("§3Added new region §c" + region + " §3with sound §c" + sound + " §3and max track number of §c" + max);
+                player.sendMessage("§bAdded new region §c" + region + " §bwith sound §c" + sound + " §band max track number of §c" + max);
                 return true;
             }
 
             if(args[0].equalsIgnoreCase("help")) {
-                player.sendMessage("§3RegionAudio Commands: (/rs, /ra, /rsm) " +
-                        "\n§cadd <region> <sound> <# of tracks>\n§3Adds a regionaudio object with region, sound name, and maximum track number" +
-                        "\n§cremove <region>\n§3Removes a regionaudio object" +
-                        "\n§clist\n§3Lists regionaudio objects" +
-                        "\n§cdebug <boolean>\n§3Toggle debug mode" +
-                        "\n§ctime <seconds>\n§3Sets the fade time when switching regions" +
-                        "\n§cheight <blocks>\n§3Sets the fade height when switching regions");
+                player.sendMessage("§bRegionAudio Commands: (/rs, /ra, /rsm) " +
+                        "\n§cadd <region> <sound> <# of tracks>\n§bAdds a regionaudio object with region, sound name, and maximum track number" +
+                        "\n§cremove <region>\n§bRemoves a regionaudio object" +
+                        "\n§clist\n§bLists regionaudio objects" +
+                        "\n§cdebug <boolean>\n§bToggles debug mode" +
+                        "\n§ctime <seconds>\n§bSets the fade time when switching regions" +
+                        "\n§cheight <blocks>\n§bSets the fade height when switching regions");
                 return true;
             }
 
             if(args.length == 2 && args[0].equalsIgnoreCase("remove")) {
                 Config.removeRegionObject(args[1]);
-                player.sendMessage("§3Removed region §c" + args[1]);
+                player.sendMessage("§bRemoved region §c" + args[1]);
                 return true;
             }
 
             if(args.length == 1 && args[0].equalsIgnoreCase("list")) {
-                player.sendMessage("§3List of regions and their properties: §c" + Config.listRegionObjects());
+                player.sendMessage("§bList of regions and their properties: §c" + Config.listRegionObjects());
                 return true;
             }
 
@@ -180,7 +180,7 @@ public class Events implements Listener, CommandExecutor {
                 }
                 height = Math.round(height * 10.0) / 10.0;
                 Config.setFadeHeight(height);
-                player.sendMessage("§3Set fade height to §c" + Config.getFadeHeight());
+                player.sendMessage("§bSet fade height to §c" + Config.getFadeHeight());
                 return true;
             }
             if(args.length == 2 && args[0].equalsIgnoreCase("time")) {
@@ -194,7 +194,7 @@ public class Events implements Listener, CommandExecutor {
                 }
                 time = Math.round(time * 10.0) / 10.0;
                 Config.setFadeTime(time);
-                player.sendMessage("§3Set fade time to §c" + Config.getFadeTime());
+                player.sendMessage("§bSet fade time to §c" + Config.getFadeTime());
                 return true;
             }
             if(args[0].equalsIgnoreCase("debug")) {
@@ -202,7 +202,7 @@ public class Events implements Listener, CommandExecutor {
                 debug = !debug;
                 Data.getPlayerData(player).setDebug(debug);
                 ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(debug));
-                player.sendMessage("§3Debug mode: §c" + debug);
+                player.sendMessage("§bDebug mode: §c" + debug);
                 return true;
             }
         }

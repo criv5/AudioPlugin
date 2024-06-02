@@ -37,10 +37,8 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(eventConstructor, this);
         getServer().getPluginManager().registerEvents(events, this);
         Config.createDefaults();
-        saveConfig();
-        Bukkit.getConsoleSender().sendMessage("§a AUDIOPLUGIN ENABLED");
+        Bukkit.getConsoleSender().sendMessage("§aAUDIOPLUGIN ENABLED");
         for(Player player : Bukkit.getOnlinePlayers()) {
-            //ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(player.getLocation()));
         }
 
@@ -49,23 +47,17 @@ public class Main extends JavaPlugin implements Listener {
             public void run() {
                 trackIncrement++;
                 for(Player player : Bukkit.getOnlinePlayers()) {
-                    if(Data.getPlayerData(player).getDebug()) player.sendMessage("§atotal current: " + trackIncrement);
-                    if (getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(getRegion(player)) && Data.getPlayerData(player).getState() != FADEOUT) {
-                        int max = Config.getMax(getRegion(player));
-                        if(max == 0) max = 1;
-                        int divider = (trackIncrement/max);
-                        int currentTrack = (trackIncrement-(divider*max));
-                        if(Data.getPlayerData(player).getDebug()) player.sendMessage("§asound: " +Config.getSound(getRegion(player)) + " max: " + Config.getMax(getRegion(player)) + " current: " + currentTrack);
-                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(Config.getSound(getRegion(player)), currentTrack));
-                    }
-                    if(getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(lastRegion.get(player.getUniqueId())) && Data.getPlayerData(player).getState() == FADEOUT) {
-                        int max = Config.getMax(lastRegion.get(player.getUniqueId()));
-                        if(max == 0) max = 1;
-                        int divider = (trackIncrement/max);
-                        int currentTrack = (trackIncrement-(divider*max));
-                        if(Data.getPlayerData(player).getDebug()) player.sendMessage("§asound: " +Config.getSound(getRegion(player)) + " max: " + Config.getMax(getRegion(player)) + " current: " + currentTrack);
-                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(Config.getSound(lastRegion.get(player.getUniqueId())), currentTrack));
-                    }
+                    String region = null;
+                    if(Data.getPlayerData(player).getState() == FADEOUT) region = lastRegion.get(player.getUniqueId()); else getRegion(player);
+                    if(!getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(region)) return;
+
+                    int max = Config.getMax(region);
+                    if(max == 0) max = 1;
+                    int divider = trackIncrement/max;
+                    int currentTrack = trackIncrement-(divider*max);
+
+                    if(Data.getPlayerData(player).getDebug()) player.sendMessage("§asound: " +Config.getSound(region) + " max: " + Config.getMax(region) + " current: " + currentTrack + " total: " + trackIncrement);
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(Config.getSound(region), currentTrack));
                 }
             }
         }.runTaskTimer(this, 0, Config.getSyncInterval()*20L);
@@ -83,6 +75,7 @@ public class Main extends JavaPlugin implements Listener {
     public void onDisable() {
         for(Player player : Bukkit.getOnlinePlayers()) {
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
+            Bukkit.getConsoleSender().sendMessage("§aAUDIOPLUGIN DISABLED");
         }
     }
 }

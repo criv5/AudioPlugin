@@ -29,10 +29,10 @@ public class Config {
             config.set("sync-interval-seconds", 5);
         }
         if(config.get("fade-time-seconds") == null) {
-            config.set("fade-time-seconds", 1);
+            config.set("fade-time-seconds", 1.5);
         }
         if(config.get("fade-height-blocks") == null) {
-            config.set("fade-height-blocks", 32);
+            config.set("fade-height-blocks", 24);
         }
         instance.saveConfig();
     }
