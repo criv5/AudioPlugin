@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class Data {
-    static HashMap<UUID, Data> playerData = new HashMap<>();
+    private static final HashMap<UUID, Data> playerData = new HashMap<>();
 
     private Player player;
     private boolean transitioning;
     private double height;
-    private double currentHeight;
     private State state;
+    private boolean debug;
 
     enum State {
         INACTIVE,
@@ -25,7 +25,7 @@ public class Data {
         this.transitioning = false;
         this.height = 0;
         this.state = State.INACTIVE;
-        this.currentHeight = currentHeight;
+        this.debug = false;
         playerData.put(player.getUniqueId(), this);
     }
 
@@ -37,14 +37,17 @@ public class Data {
         return transitioning;
     }
 
-    public State getState() {
-        return state;
-    }
-
     public double getHeight() {
         return height;
     }
 
+    public State getState() {
+        return state;
+    }
+
+    public boolean getDebug() {
+        return debug;
+    }
     public void setPlayer(Player player) {
         this.player = player;
     }
@@ -61,16 +64,20 @@ public class Data {
         this.state = state;
     }
 
-    public double getCurrentHeight() {
-        return currentHeight;
-    }
-
-    public void setCurrentHeight(double currentHeight) {
-        this.currentHeight = currentHeight;
+    public void setDebug(Boolean debug) {
+        this.debug = debug;
     }
 
     public static Data getPlayerData(Player player) {
         return playerData.get(player.getUniqueId());
+    }
+
+    public static void deletePlayerData(Player player) {
+        playerData.remove(player.getUniqueId());
+    }
+
+    public static void createPlayerData(Player player) {
+        new Data(player);
     }
 
     //IF PACKET OUT OF RENDER DISTANCE, KILL AND RESPAWN OR TELEPORT MAYBE CONSIDER MAKING A PASSENGER MIGHT WORK

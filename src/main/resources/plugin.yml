@@ -9,4 +9,4 @@ commands:
   regionsound:
     description: Region sound commands
     usage: /regionsound command
-    aliases: [rsm, rs]
+    aliases: [rsm, rs, ra, regionaudio]

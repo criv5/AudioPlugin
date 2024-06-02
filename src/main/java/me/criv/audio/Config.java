@@ -61,7 +61,7 @@ public class Config {
     public static double getFadeHeight() {
         return config.getDouble("fade-height-blocks");
     }
-    public static void setFadeTime(int seconds) {
+    public static void setFadeTime(double seconds) {
         config.set("fade-time-seconds", seconds);
         instance.saveConfig();
     }
