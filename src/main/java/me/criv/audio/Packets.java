@@ -8,7 +8,6 @@ import com.comphenix.protocol.utility.MinecraftReflection;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.google.common.collect.Lists;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.MinecraftKey;
 import net.minecraft.sounds.SoundEffect;

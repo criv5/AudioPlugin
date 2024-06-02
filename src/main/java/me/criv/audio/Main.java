@@ -22,6 +22,7 @@ public class Main extends JavaPlugin implements Listener {
     static Main instance;
     EventConstructor eventConstructor = new EventConstructor();
     Events events = new Events();
+    Commands commands = new Commands();
 
     public static Main getInstance() {
         return instance;
@@ -30,9 +31,9 @@ public class Main extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         instance = this;
-        getCommand("regionsound").setExecutor(events);
-        getCommand("rs").setExecutor(events);
-        getCommand("rsm").setExecutor(events);
+        getCommand("regionsound").setExecutor(commands);
+        getCommand("rs").setExecutor(commands);
+        getCommand("rsm").setExecutor(commands);
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getPluginManager().registerEvents(eventConstructor, this);
         getServer().getPluginManager().registerEvents(events, this);
@@ -47,14 +48,14 @@ public class Main extends JavaPlugin implements Listener {
             public void run() {
                 trackIncrement++;
                 for(Player player : Bukkit.getOnlinePlayers()) {
-                    String region = null;
-                    if(Data.getPlayerData(player).getState() == FADEOUT) region = lastRegion.get(player.getUniqueId()); else getRegion(player);
+                    String region = getRegion(player);
+                    if(Data.getPlayerData(player).getState() == FADEOUT) region = lastRegion.get(player.getUniqueId());
                     if(!getConfig().getConfigurationSection("region-sound-mappings").isConfigurationSection(region)) return;
 
                     int max = Config.getMax(region);
                     if(max == 0) max = 1;
                     int divider = trackIncrement/max;
-                    int currentTrack = trackIncrement-(divider*max);
+                    int currentTrack = trackIncrement-(divider*max)+1;
 
                     if(Data.getPlayerData(player).getDebug()) player.sendMessage("§asound: " +Config.getSound(region) + " max: " + Config.getMax(region) + " current: " + currentTrack + " total: " + trackIncrement);
                     ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.playEntitySoundPacket(Config.getSound(region), currentTrack));
