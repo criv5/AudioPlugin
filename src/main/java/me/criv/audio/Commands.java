@@ -7,6 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
+import static me.criv.audio.Packets.secondaryEntityID;
+import static me.criv.audio.Packets.staticEntityID;
+
 @SuppressWarnings("NullableProblems")
 public class Commands implements Listener, CommandExecutor {
     @Override
@@ -90,7 +93,14 @@ public class Commands implements Listener, CommandExecutor {
                 boolean debug = Data.getPlayerData(player).getDebug();
                 debug = !debug;
                 Data.getPlayerData(player).setDebug(debug);
-                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(debug));
+                if(debug)  {
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(staticEntityID, (byte) 0x00, (byte) 0x00));
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(secondaryEntityID, (byte) 0x00, (byte) (0x00)));
+                }
+                else {
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(staticEntityID, (byte) 0x20, (byte) 0x10));
+                    ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(secondaryEntityID, (byte) 0x20, (byte) (0x10/*| 0x01*/)));
+                }
                 player.sendMessage("§bDebug mode: §c" + debug);
                 return true;
             }

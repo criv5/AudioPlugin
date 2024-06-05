@@ -23,11 +23,12 @@ import java.util.stream.Collectors;
 
 public class Packets {
     public static final int staticEntityID = -2147483648;
+    public static final int secondaryEntityID = -2147483647;
 
-    public static PacketContainer spawnEntityPacket(Location location) {
+    public static PacketContainer spawnEntityPacket(int entityID, Location location, EntityType entityType) {
         PacketContainer soundEntity = new PacketContainer(PacketType.Play.Server.SPAWN_ENTITY);
         soundEntity.getIntegers()
-                .write(0, staticEntityID);
+                .write(0, entityID);
         UUID entityUUID = UUID.randomUUID();
         soundEntity.getUUIDs()
                 .write(0, entityUUID);
@@ -36,26 +37,19 @@ public class Packets {
                 .write(1, location.getY())
                 .write(2, location.getZ());
         soundEntity.getEntityTypeModifier()
-                .write(0, EntityType.ARMOR_STAND);
+                .write(0, entityType);
         return soundEntity;
     }
 
-    public static PacketContainer createEntityMetadata(boolean debug) {
+    public static PacketContainer createEntityMetadata(int entityID, byte entityFlags, byte standFlags) {
         final PacketContainer entityMetadata = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_METADATA);
-        entityMetadata.getIntegers().write(0, staticEntityID);
+        entityMetadata.getIntegers().write(0, entityID);
 
         WrappedDataWatcher dataWatcher = new WrappedDataWatcher();
-        if (!debug) {
-            byte entityFlags = 0x20; // 0x20 = invisible
             dataWatcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), entityFlags, true);
-            byte standFlags = 0x10; // 0x10 = marker
+            //0x20 invisible
             dataWatcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), standFlags, true);
-        } else {
-            byte entityFlags = 0x00;
-            dataWatcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(0, WrappedDataWatcher.Registry.get(Byte.class)), entityFlags, true);
-            byte standFlags = 0x00;
-            dataWatcher.setObject(new WrappedDataWatcher.WrappedDataWatcherObject(15, WrappedDataWatcher.Registry.get(Byte.class)), standFlags, true);
-        }
+            //0x10 marker
 
         List<WrappedDataValue> wrappedDataValueList = dataWatcher.getWatchableObjects().stream()
                 .filter(Objects::nonNull)
@@ -66,12 +60,12 @@ public class Packets {
 
         return entityMetadata;
     }
-    public static PacketContainer teleportEntityPacket(Player player, Location location) {
+    public static PacketContainer teleportEntityPacket(int entityID, Player player, Location location) {
         Data playerData = Data.getPlayerData(player);
         double height = playerData.getHeight();
         PacketContainer entityTeleport = new PacketContainer(PacketType.Play.Server.ENTITY_TELEPORT);
         entityTeleport.getIntegers()
-                .write(0, staticEntityID);
+                .write(0, entityID);
         entityTeleport.getDoubles()
                 .write(0, location.getX())
                 .write(2, location.getZ());
@@ -81,6 +75,15 @@ public class Packets {
             entityTeleport.getDoubles().write(1, location.getY() + height);
         }
         return entityTeleport;
+    }
+
+    public static PacketContainer setPassenger(int vehicleID, int passengerID, boolean passenger) {
+        PacketContainer setPassenger = new PacketContainer(PacketType.Play.Server.MOUNT);
+        setPassenger.getIntegers()
+                .write(0, vehicleID);
+        if(passenger) setPassenger.getIntegerArrays().write(0, new int[]{passengerID});
+        else setPassenger.getIntegerArrays().write(0, new int[]{});
+        return setPassenger;
     }
 
     public static PacketContainer playEntitySoundPacket(String sound, int number) {

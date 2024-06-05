@@ -38,9 +38,10 @@ public class Main extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(eventConstructor, this);
         getServer().getPluginManager().registerEvents(events, this);
         Config.createDefaults();
+        events.registerPacketListener();
         Bukkit.getConsoleSender().sendMessage("§aAUDIOPLUGIN ENABLED");
         for(Player player : Bukkit.getOnlinePlayers()) {
-            ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(player.getLocation()));
+            //ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(player.getLocation()));
         }
 
         new BukkitRunnable() {
