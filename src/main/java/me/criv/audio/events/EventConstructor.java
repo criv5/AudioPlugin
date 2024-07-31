@@ -10,9 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +21,8 @@ import static me.criv.audio.Main.getRegion;
 public class EventConstructor implements Listener {
     private static final Map<UUID, String> regionMemory = new HashMap<>();
     public static Map<UUID, String> lastRegion = new HashMap<>();
-    @EventHandler
-    public void regionChange(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-        Location location = player.getLocation();
+
+    public void regionChange(Player player, Location location) {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionQuery query = container.createQuery();
         ApplicableRegionSet locationRegions = query.getApplicableRegions(BukkitAdapter.adapt(location));
@@ -54,5 +50,25 @@ public class EventConstructor implements Listener {
         Player player = event.getPlayer();
         regionMemory.put(player.getUniqueId(), getRegion(player));
         lastRegion.put(player.getUniqueId(), getRegion(player));
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        regionChange(event.getPlayer(), event.getTo());
+    }
+
+    @EventHandler
+    public void onMove(PlayerTeleportEvent event) {
+        regionChange(event.getPlayer(), event.getTo());
+    }
+
+    @EventHandler
+    public void onMove(PlayerRespawnEvent event) {
+        regionChange(event.getPlayer(), event.getRespawnLocation());
+    }
+
+    @EventHandler
+    public void onMove(PlayerChangedWorldEvent event) {
+        regionChange(event.getPlayer(), event.getPlayer().getLocation());
     }
 }
