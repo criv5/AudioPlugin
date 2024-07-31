@@ -1,33 +1,65 @@
 package me.criv.audio;
 
+import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
+import me.criv.audio.events.EventConstructor;
 import me.criv.audio.events.PlayerRegionEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 import static me.criv.audio.Data.State.*;
 import static me.criv.audio.Main.*;
+import static me.criv.audio.Packets.*;
 import static me.criv.audio.events.EventConstructor.lastRegion;
 
 public class Events implements Listener {
+
+    public final Vector offset = new Vector(0, 5, 0);
+
+    private final Plugin plugin;
+    public Events(Plugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public void packetTeleportListener() {
+        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL, PacketType.Play.Client.TELEPORT_ACCEPT) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                Player player = event.getPlayer();
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket(staticEntityID));
+
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(staticEntityID, player.getLocation().add(offset), EntityType.BLOCK_DISPLAY));
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(staticEntityID, Data.getPlayerData(player).getDebug()));
+            }
+        });
+    }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation();
         Data.createPlayerData(player);
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(location));
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(false));
+        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.spawnEntityPacket(staticEntityID, location, EntityType.BLOCK_DISPLAY));
+        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.createEntityMetadata(staticEntityID, false));
     }
 
     @EventHandler
     void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket());
+        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.destroyEntityPacket(staticEntityID));
         Data.deletePlayerData(player);
     }
 
@@ -35,21 +67,14 @@ public class Events implements Listener {
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation();
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player, location));
-    }
-
-    @EventHandler
-    public void onTeleport(PlayerTeleportEvent event) {
-        Player player = event.getPlayer();
-        Location location = player.getLocation();
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player, location));
+        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(staticEntityID, player, location.add(offset)));
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
         Location location = player.getLocation();
-        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player, location));
+        ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(staticEntityID, player, location.add(offset)));
     }
 
     @EventHandler
@@ -88,6 +113,7 @@ public class Events implements Listener {
                 if (time > fadeTime && playerData.getState() == FADEOUT) cancel();
                 if (time != fadeTime && playerData.getState() == SWITCH) cancel();
 
+                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(staticEntityID, player, player.getLocation().add(offset)));
                 switch (playerData.getState()) {
                     case INACTIVE -> {
                         playerData.setTransitioning(false);
@@ -119,7 +145,6 @@ public class Events implements Listener {
                         time++;
                     }
                 }
-                ProtocolLibrary.getProtocolManager().sendServerPacket(player, Packets.teleportEntityPacket(player, player.getLocation()));
             }
         };
         runnable.runTaskTimer(getInstance(), 0, 1);
