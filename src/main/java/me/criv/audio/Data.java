@@ -13,19 +13,21 @@ public class Data {
     private double height;
     private State state;
     private boolean debug;
-
+    private float volume;
     enum State {
         INACTIVE,
         FADEIN,
         SWITCH,
         FADEOUT
     }
+
     public Data(Player player) {
         this.player = player;
         this.transitioning = false;
         this.height = 0;
         this.state = State.INACTIVE;
         this.debug = false;
+        this.volume = 1;
         playerData.put(player.getUniqueId(), this);
     }
 
@@ -48,6 +50,11 @@ public class Data {
     public boolean getDebug() {
         return debug;
     }
+
+    public float getVolume() {
+        return volume;
+    }
+
     public void setPlayer(Player player) {
         this.player = player;
     }
@@ -68,6 +75,10 @@ public class Data {
         this.debug = debug;
     }
 
+    public void setVolume(float volume) {
+        this.volume = volume;
+    }
+
     public static Data getPlayerData(Player player) {
         return playerData.get(player.getUniqueId());
     }
@@ -79,8 +90,4 @@ public class Data {
     public static void createPlayerData(Player player) {
         new Data(player);
     }
-
-    //IF PACKET OUT OF RENDER DISTANCE, KILL AND RESPAWN OR TELEPORT MAYBE CONSIDER MAKING A PASSENGER MIGHT WORK
-    //THIS OBJECT NEEDS TO BE ADDED TO A MAP. WHEN IN USE, GET THE PLAYERDATA HASHMAP OF THE PLAYER UUID AND USE THE RESULTING METHODS
-    //ALL VALUES NEED TO BE PER INSTANCE OF PLAYER
 }
