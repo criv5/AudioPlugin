@@ -26,10 +26,13 @@ public class Config {
             config.set("sync-interval-seconds", 5);
         }
         if(config.get("fade-time-seconds") == null) {
-            config.set("fade-time-seconds", 1.5);
+            config.set("fade-time-seconds", 2.5);
         }
         if(config.get("fade-height-blocks") == null) {
-            config.set("fade-height-blocks", 24);
+            config.set("fade-height-blocks", 18);
+        }
+        if(config.get("pitch-double") == null) {
+            config.set("pitch-double", 1.0);
         }
         instance.saveConfig();
     }
@@ -52,22 +55,29 @@ public class Config {
     public static double getFadeTime() {
         return config.getDouble("fade-time-seconds")*20;
     }
-    public static int getSyncInterval() {
-        return config.getInt("sync-interval-seconds");
+    public static double getSyncInterval() {
+        return config.getDouble("sync-interval-seconds");
     }
     public static double getFadeHeight() {
         return config.getDouble("fade-height-blocks");
+    }
+    public static double getPitch() {
+        return config.getDouble("pitch-double");
     }
     public static void setFadeTime(double seconds) {
         config.set("fade-time-seconds", seconds);
         instance.saveConfig();
     }
-    public static void setSyncInterval(int seconds) {
+    public static void setSyncInterval(double seconds) {
         config.set("sync-interval-seconds", seconds);
         instance.saveConfig();
     }
     public static void setFadeHeight(double blocks) {
         config.set("fade-height-blocks", blocks);
+        instance.saveConfig();
+    }
+    public static void setPitch(double pitch) {
+        config.set("pitch-double", pitch);
         instance.saveConfig();
     }
 }
